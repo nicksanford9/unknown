@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# scraped data (PII + large; lives in Supabase, not git)
+/data/
+
 # vercel
 .vercel
 
