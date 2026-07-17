@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/* ---- Static design tokens (neutrals + fonts). Brand color is per-business, set as
+   CSS vars on the site wrapper, so it stays parametric across every prospect. ---- */
+@theme {
+  --color-ink: #0e1720; /* near-black text */
+  --color-ink-soft: #3a4652; /* secondary text */
+  --color-muted: #62707c; /* tertiary / captions */
+  --color-line: #e4e8eb; /* hairlines, borders */
+  --color-paper: #f6f7f8; /* cool paper background */
+  --color-card: #ffffff;
+}
+
+:root {
+  /* Fallback brand values; overridden per-business via themeVars(). */
+  --brand: #0a3049;
+  --brand-dark: #06212f;
+  --brand-tint: #eaf1f5;
+  --accent: #b5813e;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Font role helpers (next/font sets the vars on <html>). */
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+.font-body {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+/* Utility: mono "spec" label — the signature data treatment. */
+.spec {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Focus ring for the quality floor. */
+:where(a, button):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
