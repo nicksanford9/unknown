@@ -1,0 +1,29 @@
+{
+  "niche": "plumber",
+  "keep_categories": ["Plumber"],
+  "ambiguous_categories": [
+    "HVAC contractor",
+    "Air conditioning contractor",
+    "Air conditioning repair service",
+    "Heating contractor",
+    "Mechanical contractor",
+    "Handyman/Handywoman/Handyperson",
+    "General contractor",
+    "Contractor",
+    "Remodeler"
+  ],
+  "ambiguous_subtype_signals": ["plumber", "plumbing", "gasfitter"],
+  "reject_url_tokens": ["supply", "hardware", "grainger", "restoration", "remodel", "handyman", "pestcontrol", "construction"],
+  "niche_token": "plumb",
+  "franchise_names": [
+    "roto-rooter",
+    "mr. rooter",
+    "mr rooter",
+    "benjamin franklin plumbing",
+    "ars rescue rooter",
+    "rescue rooter",
+    "zoom drain",
+    "bluefrog plumbing",
+    "1-800-plumber"
+  ]
+}

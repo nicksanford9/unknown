@@ -32,15 +32,16 @@ Scope: everything from "raw Outscraper/Apify pull" to "prospect with a finished 
 `Outscraper-20260717211023m39_plumber.csv` — 120 columns, 430 rows → **236 unique place_ids** (zip-code query mode duplicates heavily; dedupe on `place_id` is mandatory, and per-zip `query` column tells you which zips a business surfaced in).
 
 - **Phone types (deduped)**: 101 landline, 71 mobile, 37 fixed line, 17 blank, 6 voip, 4 toll-free. Treat blank→mobile as planned; treat voip like landline (office system).
-- **Tier sizes (type=Plumber, 174 of 236)**: Tier A (mobile/blank + no website) ≈ **38**, Tier B (mobile + website) ≈ 27, Tier C (landline etc.) ≈ 109.
-- **Facebook**: 102/236 have one — but **0 of the 38 Tier A** do. Outscraper's contact enrichment only finds Facebook when there's a website to crawl, so the agentic Facebook hunt is not optional; it's the only source for exactly the leads we care about.
+- **Segment sizes (type=Plumber, 174 of 236)**: callable + no website ≈ **38**, callable + website ≈ 27 (≈65 callable total), landline/fixed ≈ 109 (kept, not called).
+- **Facebook**: 102/236 have one — but **0 of the 38 callable no-website leads** do. Outscraper's contact enrichment only finds Facebook when there's a website to crawl, so the agentic Facebook hunt is not optional; it's the only source for exactly the leads we care about.
 - **`full_name`/`first_name`/`title` (leads_n_contacts enrichment)**: real person names on 62/236. **Decision: skipped for v1** — owner names come from the enrichment agent (review replies etc.); revisit these columns later as a cross-check.
 - **`owner_title`** is the GMB listing owner = business name, not a person. Ignore for owner hunting.
 - **`chain_info.chain`** True/False flag (16 True) — free franchise auto-reject signal.
 - **`company_insights.founded_year`** on 60/236 — years-in-business for site copy.
 - **`whitepages_phones.*`** columns are ~empty (6/430) — drop that enrichment from future pulls, it costs money for nothing.
 - **Logo URLs come at 44px** (`.../s44-p-k-no-ns-nd/photo.jpg`). **Remove the size segment entirely** (`.../photo.jpg`) — verified live: returns the original upload (512px on the sample) vs 44px. Do this before color extraction/header use.
-- **Website tech columns** (`website_generator`, `website_has_gtm`, `website_has_fb_pixel`) — free ammo for the Tier B pitch ("your Wix site has no tracking installed…").
+- **Website tech columns** (`website_generator`, `website_has_gtm`, `website_has_fb_pixel`) — free ammo for the `has_website` pitch ("your Wix site has no tracking installed…").
+- **Website field lies two ways**: Outscraper exports mangle URLs (`?`→`%3F` etc. — decode before use), and some "websites" are actually Facebook pages → those get pitch_angle `facebook_only` (no real site + active social = strongest lead profile). `check-websites.mts` tests each homepage: Birmingham → 185 up, 22 bot-blocked (treat as up), 16 genuinely broken (dead DNS, expired SSL, 404s) — "your site is down right now" is a verifiable opener.
 - **Apify overlap**: only 76 place_ids shared between the Outscraper 236 and the Apify 184 — the two searches surface meaningfully different sets. Load both into `places`; union coverage is real, and Apify-only rows still carry the rank snapshot.
 
 ---
@@ -68,8 +69,9 @@ first_seen timestamptz, last_seen timestamptz
 **`place_qualification`** — the trim-down verdict, auditable and reversible:
 ```sql
 place_id text pk references places,
-verdict text,          -- 'qualified' | 'rejected' | 'bench'
-tier text,             -- A/B/C priority for the call queue (see §3)
+verdict text,          -- 'qualified' | 'rejected'
+callable bool,         -- phone_type mobile/unknown → true; landline/fixed/voip → false (kept, not called)
+pitch_angle text,      -- 'no_website' | 'has_website' | 'facebook_only' — which opener to use, not a quality ranking
 reject_reason text,    -- 'not_plumber' | 'franchise_national' | 'closed' | 'duplicate' | ...
 decided_by text,       -- 'script' | 'agent' | 'human'
 notes text, decided_at timestamptz
@@ -110,20 +112,22 @@ searched_at timestamptz
 
 **Stage 2 — agent adjudicates the ambiguous bucket** (name + categories + description + website + a skim of reviews): is this actually a plumbing business a homeowner would call? Writes verdict + reason to `place_qualification` with `decided_by='agent'`.
 
-**Stage 3 — tiering (not rejection).** Landlines stay in the DB — you're right that they're the market's top performers and we need them for the ranking-comparison pitch. They're just not in the A call queue.
-- **Tier A**: mobile/unknown phone + no website — the core free-website pitch
-- **Tier B**: mobile + has a website (site may be garbage — agent glances and notes; "your site is hurting you" is a pitch too)
-- **Tier C**: landline/fixed — not called initially; retained for market stats and maybe a later, different pitch
+**Stage 3 — callable flag (binary, not a ranking).** Landlines stay in the DB — they're the market's top performers and the comparison set for the ranking pitch. They're just not called.
+- **callable = true**: mobile or unknown/blank phone → goes in the call queue
+- **callable = false**: landline/fixed/voip/toll-free → kept for market stats, no calls for now
+- **pitch_angle** (metadata, not priority): `no_website` | `has_website` — records the fact, implies nothing about quality. A business with a website can be a better buyer than one without — website presence says which pitch, not lead quality.
+
+*(Deliberately no lead scoring for v1 — the queue is binary. If call results later show clear win patterns, a score can be layered on as a sort order.)*
 
 Everything about Stage 1 is config, not code: `scripts/intake/config/plumber.json` holds the allow/block lists so the next niche is a new config file, not a new script.
 
 ---
 
-## 4. Enrichment agent (per Tier A/B prospect)
+## 4. Enrichment agent (per callable prospect)
 
 One agent run per prospect, with web search, producing one `enrichment` row:
 
-1. **Facebook hunt** — search `"<name>" <city>` and `"<phone>"`; verify a candidate page by phone/address match before accepting. Note if it's active (posts within ~6 months). Outscraper-blank-but-Facebook-active + no website is your best lead profile — this flips prospects into Tier A+.
+1. **Facebook hunt** — search `"<name>" <city>` and `"<phone>"`; verify a candidate page by phone/address match before accepting. Note if it's active (posts within ~6 months). Outscraper-blank-but-Facebook-active + no website is your best lead profile — flag these — it's your best lead profile.
 2. **Owner name** — sources in priority order: Outscraper `owner_title` if it's a person; how the business signs review replies; names customers repeatedly use in reviews ("John was great" × 8); Facebook page. Record confidence — you only say "Hey John" on the phone if confidence is high.
 3. **Generic search checklist** — AL plumbing license (Alabama Plumbers & Gas Fitters Examining Board lookup), years in business ("serving Birmingham since…"), BBB/Angi/Yelp presence, and a free-text `special_notes` for anything unusual (award, news story, veteran-owned, father-son shop…) — cold-call gold.
 4. **Services mentioned** — while skimming reviews: tally service keywords (water heater, sewer line, gas, tankless, slab leak…) into `services_mentioned` — feeds site personalization (§6).
@@ -174,9 +178,9 @@ Outscraper pull ──→ data/raw/outscraper/           Apify market pull ─�
         ▼
  [script] qualify pass 1  → auto-keep / auto-reject / ambiguous
  [agent]  qualify pass 2  → ambiguous adjudicated       } place_qualification
- [script] tiering A/B/C
+ [script] callable flag + pitch angle
         ▼
- [agent]  enrichment (Tier A/B: facebook, owner, license, services)
+ [agent]  enrichment (callable prospects: facebook, owner, license, services)
         ▼
  [apify]  deep scrape reviews+photos (placeIds, cap 200 each) → place_reviews/place_photos
         ▼
@@ -184,7 +188,7 @@ Outscraper pull ──→ data/raw/outscraper/           Apify market pull ─�
  [agent]  photo curation → hero/about/service picks
  [script+agent] site build → site_configs → live at /{slug}
         ▼
- call queue (Tier A first) — you, on the phone
+ call queue (all callable) — you, on the phone
 ```
 
 ## 8. Agents & skills layout
@@ -199,7 +203,7 @@ Scaffolds for these are in the repo as drafts; they get finalized as the scripts
 
 ## 9. Open decisions for you
 
-1. **Deep-scrape spend**: reviews+photos for all qualified (~$2–4/market of Apify credit) or Tier A only?
-2. **Tier B pitch**: include has-website businesses in the first Birmingham call batch, or A-only until the process is proven?
+1. **Deep-scrape spend**: reviews+photos for all qualified (~$2–4/market of Apify credit) or callable-only?
+2. **First call batch**: mix both pitch angles (no-website and bad-website) or start no-website-only until the process is proven?
 3. **Stock photos**: need to actually source the stock set (heroes, abouts, one per service in the library). Licensed source preference? (Unsplash is fine to start.)
 4. **Supabase**: I propose creating the schema above in the existing project now so the loader script has a target. Any objection?
