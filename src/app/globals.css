@@ -54,11 +54,54 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Eyebrow with the signature "pipe seam" — a rule + coupler dash drawn in
+   currentColor so it adapts to light and dark sections automatically. */
 .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.72rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+}
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: 34px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    currentColor 0 22px,
+    transparent 22px 27px,
+    currentColor 27px 34px
+  );
+}
+
+/* Flat engineered card: hairline border, no shadow, brass seam slides in on hover. */
+.card-flat {
+  position: relative;
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.card-flat::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 1.25rem;
+  height: 2px;
+  width: 0;
+  background: var(--accent-ink);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-flat:hover {
+  border-color: color-mix(in srgb, var(--brand) 25%, var(--color-line));
+  transform: translateY(-2px);
+}
+.card-flat:hover::before {
+  width: 2.5rem;
 }
 
 /* Focus ring for the quality floor. */

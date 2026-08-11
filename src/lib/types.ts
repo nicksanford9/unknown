@@ -36,6 +36,8 @@ export type Hours = {
 
 export type Business = {
   slug: string;
+  /** Which template renders this site. */
+  template?: "v1" | "v2" | "v3";
   name: string;
   niche: string; // "plumber" for now
   /** One-line what-they-do, niche-specific. */
@@ -66,7 +68,16 @@ export type Business = {
   reviewCount?: number;
   yearsInBusiness?: number;
   licensed?: boolean;
+  /** Only set when an actual license number was found — gates "Licensed" claims. */
+  licenseNumber?: string;
   emergency247?: boolean;
+
+  // Location point (service-area map)
+  lat?: number;
+  lng?: number;
+
+  /** Job/work photos for the gallery. Empty/undefined → section hidden. */
+  gallery?: { url: string; label: string }[];
 
   // Content
   about: string;

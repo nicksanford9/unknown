@@ -1,4 +1,4 @@
-import { Star, Quote, ArrowUpRight } from "lucide-react";
+import { Star, ArrowUpRight } from "lucide-react";
 import type { Business } from "@/lib/types";
 import { shouldShowReviews } from "@/lib/types";
 import { Reveal } from "./Reveal";
@@ -12,13 +12,13 @@ export function Reviews({ business }: { business: Business }) {
   return (
     <section
       id="reviews"
-      className="py-24 sm:py-32"
+      className="py-16 sm:py-28"
       style={{ background: "var(--brand-tint)" }}
     >
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
-            <p className="eyebrow mb-5" style={{ color: "var(--accent)" }}>
+            <p className="eyebrow mb-5" style={{ color: "var(--accent-ink)" }}>
               What customers say
             </p>
             <h2 className="font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
@@ -30,7 +30,7 @@ export function Reviews({ business }: { business: Business }) {
               <Star
                 key={i}
                 className="h-6 w-6"
-                style={{ color: "var(--accent)", fill: "var(--accent)" }}
+                style={{ color: "var(--accent-ink)", fill: "var(--accent-ink)" }}
               />
             ))}
           </div>
@@ -39,12 +39,15 @@ export function Reviews({ business }: { business: Business }) {
         <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {fiveStar.map((review, i) => (
             <Reveal key={review.author + i} delay={(i % 3) * 0.08}>
-              <figure className="flex h-full flex-col rounded-2xl bg-card p-8 shadow-sm">
-                <Quote
-                  className="h-8 w-8"
-                  style={{ color: "var(--accent)", opacity: 0.5 }}
-                />
-                <blockquote className="mt-4 flex-1 font-body text-[1.05rem] leading-relaxed text-ink-soft">
+              <figure className="card-flat flex h-full flex-col p-7 sm:p-8">
+                <span
+                  aria-hidden
+                  className="font-display text-5xl font-black leading-none"
+                  style={{ color: "var(--accent-ink)", opacity: 0.85 }}
+                >
+                  “
+                </span>
+                <blockquote className="mt-3 flex-1 font-body text-[1.05rem] leading-relaxed text-ink-soft">
                   “{review.text}”
                 </blockquote>
                 <figcaption className="mt-6 flex items-center justify-between border-t border-line pt-5">
@@ -56,7 +59,7 @@ export function Reviews({ business }: { business: Business }) {
                       <Star
                         key={s}
                         className="h-3.5 w-3.5"
-                        style={{ color: "var(--accent)", fill: "var(--accent)" }}
+                        style={{ color: "var(--accent-ink)", fill: "var(--accent-ink)" }}
                       />
                     ))}
                   </span>

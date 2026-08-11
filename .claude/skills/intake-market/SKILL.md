@@ -1,4 +1,4 @@
----
+1---
 name: intake-market
 description: Run the full prospect intake pipeline for a niche + market (e.g. "plumbers in Birmingham AL") — load raw scrapes, qualify, enrich, deep-scrape reviews/photos, and build site configs. Use when the user says to intake/process a new market or a new Outscraper/Apify pull.
 ---

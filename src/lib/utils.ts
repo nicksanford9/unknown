@@ -4,6 +4,12 @@ export function telHref(phone: string): string {
   return `tel:${digits}`;
 }
 
+/** sms: href from a display phone. */
+export function smsHref(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, "");
+  return `sms:${digits}`;
+}
+
 /** Join class names, dropping falsy. */
 export function cn(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");

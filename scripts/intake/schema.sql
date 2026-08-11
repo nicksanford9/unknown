@@ -109,5 +109,27 @@ create table if not exists site_configs (
   updated_at   timestamptz not null default now()
 );
 
+-- Human calibration verdicts from /admin/calibrate. Kept separate from
+-- place_qualification so pipeline verdicts stay comparable to the human's.
+create table if not exists human_calibration (
+  place_id     text primary key references places,
+  tier         text,                      -- 'build' | 'skip' | 'discuss'; null = note saved before verdict
+  voice_note   text,                      -- transcribed reasoning
+  updated_at   timestamptz not null default now()
+);
+
+-- Leads captured by generated sites' quote forms.
+create table if not exists site_leads (
+  id           bigint generated always as identity primary key,
+  slug         text not null,
+  name         text not null,
+  phone        text not null,
+  service      text,
+  message      text,
+  handled      boolean not null default false,
+  created_at   timestamptz not null default now()
+);
+
 create index if not exists idx_places_market on places (market, niche);
+create index if not exists idx_site_leads_slug on site_leads (slug, created_at desc);
 create index if not exists idx_prospects_status on prospects (status);

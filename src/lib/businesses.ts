@@ -40,6 +40,36 @@ const BUSINESSES: Business[] = [
     licensed: true,
     emergency247: true,
 
+    lat: 33.5186,
+    lng: -86.8104,
+
+    gallery: [
+      {
+        url: "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=1200&q=80",
+        label: "Water heater installation",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=1200&q=80",
+        label: "Leak detection & repair",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1200&q=80",
+        label: "Fixture upgrades",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=1200&q=80",
+        label: "Repiping",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1200&q=80",
+        label: "Bathroom plumbing",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=1200&q=80",
+        label: "Emergency repairs",
+      },
+    ],
+
     about:
       "Vulcan City Plumbing has kept Birmingham homes running since 2007. We're a family-owned team of licensed plumbers who show up on time, quote before we work, and treat your home like our own. From a leaky faucet to a full repipe, we do it right the first time — no upsells, no surprises.",
 
@@ -122,6 +152,65 @@ const BUSINESSES: Business[] = [
     ],
   },
 ];
+
+// v2 comparison demo — same business, rewritten copy, rendered by the site2 template.
+BUSINESSES.push({
+  ...BUSINESSES[0],
+  slug: "birmingham-plumbing-demo2",
+  template: "v2",
+  tagline: "On time, up front, and fixed for good.",
+  about:
+    "When a pipe lets go at midnight, you don't want a call center — you want a plumber who picks up. Vulcan City Plumbing has been answering Birmingham's calls since 2007: family-owned, licensed, and honest about the price before we touch a wrench. We quote it straight, fix it right, and clean up like we were never there.",
+});
+
+// Focused content/design comparison: homeowner-first proof and service photography.
+BUSINESSES.push({
+  ...BUSINESSES[0],
+  slug: "birmingham-plumbing-demo1",
+  template: "v3",
+  tagline:
+    "Clear options before the work starts. Careful repairs that hold up after we leave.",
+  about:
+    "Plumbing trouble already disrupts your day. Getting it fixed shouldn't add more uncertainty. Vulcan City Plumbing gives Birmingham homeowners a clear diagnosis, practical repair options, and the price before work begins. We protect the work area, explain what we found in plain English, and test the repair before we pack up.",
+  services: [
+    {
+      icon: "Droplets",
+      title: "Leak Detection & Repair",
+      description:
+        "We trace the source instead of guessing, explain what failed, and repair the problem with as little disruption to your home as possible.",
+    },
+    {
+      icon: "ShowerHead",
+      title: "Drain Cleaning",
+      description:
+        "We clear stubborn kitchen, bath, and main-line clogs, then check what caused the blockage so you know the next sensible step.",
+    },
+    {
+      icon: "Flame",
+      title: "Water Heater Service",
+      description:
+        "No hot water, strange noises, or a leaking tank? We assess the system and compare repair and replacement options without pressure.",
+    },
+    {
+      icon: "Wrench",
+      title: "Repiping & Fixtures",
+      description:
+        "From one worn fixture to aging supply lines, we plan clean, code-conscious upgrades around your home and budget.",
+    },
+    {
+      icon: "ShieldAlert",
+      title: "Emergency Plumbing",
+      description:
+        "When water cannot wait, call any time. We help you limit the damage and dispatch the right response for the problem.",
+    },
+    {
+      icon: "Home",
+      title: "Sewer Line Repair",
+      description:
+        "We diagnose backups and damaged lines, show you what we found, and walk through repair choices before excavation begins.",
+    },
+  ],
+});
 
 export function getBusinessBySlug(slug: string): Business | undefined {
   return BUSINESSES.find((b) => b.slug === slug);

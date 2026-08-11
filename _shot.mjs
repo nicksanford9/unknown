@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 
 const url = process.argv[2] || "http://localhost:3000/birmingham-plumbing-demo";
 const out = process.argv[3] || "shot";
-const dir = "/tmp/claude-1000/-workspaces-New/1cf6cbbf-c43b-4d64-9542-847b34a09742/scratchpad";
+const dir = process.env.SHOT_DIR || ".";
 
 const browser = await chromium.launch();
 
@@ -30,7 +30,17 @@ await dp.screenshot({ path: `${dir}/${out}-hero.png`, clip: { x: 0, y: 0, width:
 const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
 const mp = await mobile.newPage();
 await mp.goto(url, { waitUntil: "networkidle" });
-await mp.waitForTimeout(1200);
+// Same scroll pass as desktop — whileInView reveals stay invisible otherwise.
+await mp.evaluate(async () => {
+  const step = window.innerHeight * 0.6;
+  for (let y = 0; y < document.body.scrollHeight; y += step) {
+    window.scrollTo(0, y);
+    await new Promise((r) => setTimeout(r, 220));
+  }
+  window.scrollTo(0, 0);
+  await new Promise((r) => setTimeout(r, 400));
+});
+await mp.waitForTimeout(600);
 await mp.screenshot({ path: `${dir}/${out}-mobile.png`, fullPage: true });
 
 await browser.close();

@@ -23,18 +23,18 @@ const ICONS: Record<string, LucideIcon> = {
 
 export function Services({ business }: { business: Business }) {
   return (
-    <section id="services" className="py-24 sm:py-32">
+    <section id="services" className="py-16 sm:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="max-w-2xl">
-          <p className="eyebrow mb-5" style={{ color: "var(--accent)" }}>
+          <p className="eyebrow mb-5" style={{ color: "var(--accent-ink)" }}>
             What we do
           </p>
           <h2 className="font-display text-4xl font-black leading-tight tracking-tight text-ink sm:text-5xl">
             Full-service plumbing, done right.
           </h2>
           <p className="mt-6 font-body text-lg leading-relaxed text-ink-soft">
-            From emergency repairs to full installations, {business.name} handles
-            every job with the same care and honest pricing.
+            From emergency repairs to full installations, {business.name}{" "}
+            handles every job with the same care and honest pricing.
           </p>
         </Reveal>
 
@@ -43,9 +43,9 @@ export function Services({ business }: { business: Business }) {
             const Icon = ICONS[service.icon] ?? Wrench;
             return (
               <Reveal key={service.title} delay={(i % 3) * 0.08}>
-                <div className="group h-full rounded-2xl border border-line bg-card p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-[var(--brand)]/25 hover:shadow-xl hover:shadow-[var(--brand)]/5">
+                <div className="card-flat h-full p-7 sm:p-8">
                   <div
-                    className="grid h-13 w-13 place-items-center rounded-xl transition-colors"
+                    className="grid h-12 w-12 place-items-center rounded-md"
                     style={{ background: "var(--brand-tint)" }}
                   >
                     <Icon className="h-6 w-6" style={{ color: "var(--brand)" }} />
